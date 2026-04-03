@@ -1,0 +1,201 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+:root {
+  --cream: #FBF8F3;
+  --forest: #1C2B1F;
+  --sage: #4D6B52;
+  --amber: #C8731A;
+  --blush: #EDE0D4;
+  --card: #FFFFFF;
+  --border: #E8DDD4;
+  --text-muted: #7A8C7D;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  background-color: var(--cream);
+  color: var(--forest);
+  font-family: 'Noto Sans JP', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mincho {
+  font-family: 'Shippori Mincho B1', serif;
+}
+
+/* ─ Dot pattern background ─ */
+.bg-dot {
+  background-color: var(--cream);
+  background-image: radial-gradient(circle, #c8b8a820 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ─ Card ─ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(28, 43, 31, 0.06);
+}
+
+/* ─ Answer button ─ */
+.answer-btn {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: white;
+  color: var(--forest);
+  font-size: 15px;
+  font-family: 'Noto Sans JP', sans-serif;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.answer-btn:hover {
+  border-color: var(--amber);
+  background: #FFF8F0;
+  transform: translateY(-1px);
+}
+
+.answer-btn.selected {
+  border-color: var(--amber);
+  background: #FFF3E4;
+  font-weight: 500;
+}
+
+.answer-btn .score-dot {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blush);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sage);
+  transition: all 0.15s;
+}
+
+.answer-btn.selected .score-dot {
+  background: var(--amber);
+  color: white;
+}
+
+/* ─ Progress bar ─ */
+.progress-track {
+  height: 4px;
+  background: var(--blush);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--sage), var(--amber));
+  transition: width 0.4s ease;
+}
+
+/* ─ Primary button ─ */
+.btn-primary {
+  background: var(--forest);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  background: var(--sage);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(28, 43, 31, 0.25);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─ Tag/Badge ─ */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ─ Section badge ─ */
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid;
+}
+
+/* ─ Temperament color classes ─ */
+.temp-sanguine { background: #FEF3DA; color: #8B5E0A; border-color: #F5A62340; }
+.temp-choleric  { background: #FDECEA; color: #9B2C22; border-color: #E05A4E40; }
+.temp-phlegmatic { background: #E6F4F2; color: #1A5C56; border-color: #4A9B8E40; }
+.temp-melancholic { background: #F0ECF7; color: #4E3580; border-color: #8B6BAE40; }
+
+/* ─ Slide-in animation ─ */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.slide-up {
+  animation: slideUp 0.35s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* ─ Result meter bar ─ */
+.meter-track {
+  height: 8px;
+  border-radius: 99px;
+  background: var(--blush);
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.8s ease;
+}

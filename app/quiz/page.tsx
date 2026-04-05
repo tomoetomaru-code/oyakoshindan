@@ -88,7 +88,7 @@ export default function QuizPage() {
         <div className="card max-w-md w-full p-8 text-center slide-up">
           <div className="text-5xl mb-4">🧒</div>
           <h2 className="font-mincho text-2xl font-bold mb-3" style={{ color: "var(--forest)" }}>
-            まずは子どもについて答えましょう
+            まずはお子さんについての質問です
           </h2>
           <p className="text-sm leading-relaxed mb-6" style={{ color: "var(--text-muted)" }}>
             お子さんの普段の様子を思い浮かべながら、
@@ -97,14 +97,6 @@ export default function QuizPage() {
             <br />
             全 <strong>20問</strong> です。
           </p>
-          <div className="rounded-xl p-4 mb-6 text-left text-sm" style={{ background: "var(--cream)", border: "1px solid var(--border)" }}>
-            <p style={{ color: "var(--sage)" }}>📋 診断内容</p>
-            <ul className="mt-2 space-y-1" style={{ color: "var(--text-muted)" }}>
-              <li>・ シュタイナー4気質（8問）</li>
-              <li>・ MI理論・多重知能（8問）</li>
-              <li>・ ユング内向/外向（4問）</li>
-            </ul>
-          </div>
           <button className="btn-primary w-full justify-center" onClick={() => setPhase("child-quiz")}>
             子どもの診断をはじめる →
           </button>
@@ -124,7 +116,7 @@ export default function QuizPage() {
             </span>
           </div>
           <h2 className="font-mincho text-2xl font-bold mb-3" style={{ color: "var(--forest)" }}>
-            次はあなた自身について答えましょう
+            あなた自身についての質問です
           </h2>
           <p className="text-sm leading-relaxed mb-6" style={{ color: "var(--text-muted)" }}>
             親御さん自身の子育てのスタイルや日常を
@@ -133,14 +125,6 @@ export default function QuizPage() {
             <br />
             全 <strong>15問</strong> です。
           </p>
-          <div className="rounded-xl p-4 mb-6 text-left text-sm" style={{ background: "var(--cream)", border: "1px solid var(--border)" }}>
-            <p style={{ color: "var(--sage)" }}>📋 診断内容</p>
-            <ul className="mt-2 space-y-1" style={{ color: "var(--text-muted)" }}>
-              <li>・ シュタイナー4気質（6問）</li>
-              <li>・ MI理論・強みの知能（5問）</li>
-              <li>・ ユング内向/外向（4問）</li>
-            </ul>
-          </div>
           <button className="btn-primary w-full justify-center" onClick={() => setPhase("parent-quiz")}>
             親の診断をはじめる →
           </button>
@@ -191,20 +175,6 @@ export default function QuizPage() {
             className="progress-fill"
             style={{ width: `${((currentQ + 1) / sectionTotal) * 100}%` }}
           />
-        </div>
-
-        {/* Framework badge */}
-        <div className="mb-4">
-          <span
-            className="text-xs px-3 py-1 rounded-full"
-            style={{ background: "var(--blush)", color: "var(--sage)" }}
-          >
-            {q.framework === "steiner"
-              ? "🌿 シュタイナー4気質"
-              : q.framework === "mi"
-              ? "🧠 MI理論"
-              : "☯ ユング内向/外向"}
-          </span>
         </div>
 
         {/* Question */}

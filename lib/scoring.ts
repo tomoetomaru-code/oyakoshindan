@@ -70,7 +70,7 @@ export function buildResult(
 // ── ラベル辞書 ────────────────────────────────────────────
 export const steinerLabel: Record<SteinerType, string> = {
   sanguine: "わくわく冒険タイプ",
-  choleric: "熱血！意志の強いタイプ",
+  choleric: "熱血チャレンジャータイプ",
   phlegmatic: "ほっこりマイペースタイプ",
   melancholic: "おもいやり繊細タイプ",
 };
@@ -141,7 +141,7 @@ export const steinerDesc: Record<SteinerType, {
     supportYell: "毎日ドタバタしていても、あなたはしっかりお子さんの「楽しい！」を守っています。飽きっぽく見えるのは、それだけたくさんのことに興味を持てる才能の証。焦らなくて大丈夫。好奇心を大切にしてあげるあなたの関わりが、お子さんの一番の宝物です✨",
   },
   choleric: {
-    title: "熱血！意志の強いタイプ",
+    title: "熱血チャレンジャータイプ",
     tagline: "情熱的な意志の強いリーダー",
     strengths: ["強い意志と実行力", "リーダーシップ", "目標に向かって突き進む力", "物事をやり遂げる力"],
     challenges: ["カッとなりやすい", "負けを認めるのが苦手", "指図されることへの抵抗"],

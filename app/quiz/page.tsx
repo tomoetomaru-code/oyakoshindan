@@ -95,7 +95,7 @@ export default function QuizPage() {
             <br />
             直感で答えてください。
             <br />
-            全 <strong>20問</strong> です。
+            全 <strong>28問</strong> です。
           </p>
           <button className="btn-primary w-full justify-center" onClick={() => setPhase("child-quiz")}>
             子どもの診断をはじめる →
@@ -123,7 +123,7 @@ export default function QuizPage() {
             <br />
             思い浮かべながら答えてください。
             <br />
-            全 <strong>15問</strong> です。
+            全 <strong>19問</strong> です。
           </p>
           <button className="btn-primary w-full justify-center" onClick={() => setPhase("parent-quiz")}>
             親の診断をはじめる →

@@ -37,13 +37,13 @@ export default function Home() {
         >
           <div>
             <div className="text-2xl font-bold font-mincho" style={{ color: "var(--amber)" }}>
-              35問
+              47問
             </div>
             <div className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>合計質問数</div>
           </div>
           <div>
             <div className="text-2xl font-bold font-mincho" style={{ color: "var(--amber)" }}>
-              8〜10分
+              12〜15分
             </div>
             <div className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>所要時間</div>
           </div>

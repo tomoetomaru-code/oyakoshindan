@@ -69,10 +69,10 @@ export function buildResult(
 
 // ── ラベル辞書 ────────────────────────────────────────────
 export const steinerLabel: Record<SteinerType, string> = {
-  sanguine: "好奇心ワクワクタイプ",
-  choleric: "情熱パワフルタイプ",
-  phlegmatic: "おだやかマイペースタイプ",
-  melancholic: "繊細こだわりタイプ",
+  sanguine: "わくわく冒険タイプ",
+  choleric: "熱血！意志の強いタイプ",
+  phlegmatic: "ほっこりマイペースタイプ",
+  melancholic: "おもいやり繊細タイプ",
 };
 
 export const steinerColor: Record<SteinerType, string> = {
@@ -90,14 +90,14 @@ export const steinerEmoji: Record<SteinerType, string> = {
 };
 
 export const miLabel: Record<MIType, string> = {
-  linguistic: "言語",
-  logical: "論理・数学",
-  spatial: "空間",
-  musical: "音楽",
-  bodily: "身体運動",
-  interpersonal: "対人",
-  intrapersonal: "内省",
-  naturalist: "博物",
+  linguistic: "ことば・お話",
+  logical: "なぜなぜ・考える",
+  spatial: "つくる・えがく",
+  musical: "音楽・リズム",
+  bodily: "からだを動かす",
+  interpersonal: "お友達と遊ぶ",
+  intrapersonal: "じっくり考える",
+  naturalist: "自然・いきもの",
 };
 
 export const miEmoji: Record<MIType, string> = {
@@ -127,7 +127,7 @@ export const steinerDesc: Record<SteinerType, {
   supportYell: string;
 }> = {
   sanguine: {
-    title: "好奇心ワクワクタイプ",
+    title: "わくわく冒険タイプ",
     tagline: "好奇心いっぱいの自由な探検家",
     strengths: ["新しいことへの好奇心旺盛", "社交的でコミュニケーション上手", "感情表現が豊か", "どんな状況にも柔軟に対応"],
     challenges: ["集中が続きにくい", "約束や片付けが苦手", "気が散りやすい"],
@@ -141,7 +141,7 @@ export const steinerDesc: Record<SteinerType, {
     supportYell: "毎日ドタバタしていても、あなたはしっかりお子さんの「楽しい！」を守っています。飽きっぽく見えるのは、それだけたくさんのことに興味を持てる才能の証。焦らなくて大丈夫。好奇心を大切にしてあげるあなたの関わりが、お子さんの一番の宝物です✨",
   },
   choleric: {
-    title: "情熱パワフルタイプ",
+    title: "熱血！意志の強いタイプ",
     tagline: "情熱的な意志の強いリーダー",
     strengths: ["強い意志と実行力", "リーダーシップ", "目標に向かって突き進む力", "物事をやり遂げる力"],
     challenges: ["カッとなりやすい", "負けを認めるのが苦手", "指図されることへの抵抗"],
@@ -155,7 +155,7 @@ export const steinerDesc: Record<SteinerType, {
     supportYell: "強い意志をもつお子さんとの毎日は、正直へとへとになることもありますよね。でも大丈夫、それはお子さんが「自分らしく生きたい！」と全力で伝えているサイン。ぶつかっても、それだけ真剣に向き合っているあなたはすごい親御さんです。自信を持って🔥",
   },
   phlegmatic: {
-    title: "おだやかマイペースタイプ",
+    title: "ほっこりマイペースタイプ",
     tagline: "穏やかで安定感のあるマイペース派",
     strengths: ["穏やかで安定している", "コツコツ取り組む持続力", "よく聴いて信頼される存在", "変化にじっくり適応する力"],
     challenges: ["急な変化や予定変更への対応", "なかなか動き出せない", "慎重すぎて機会を逃すことも"],
@@ -169,7 +169,7 @@ export const steinerDesc: Record<SteinerType, {
     supportYell: "「もっと早くして」「なんでできないの」と思う瞬間があっても、責めなくて大丈夫。このタイプのお子さんはゆっくり確実に、自分のペースで育っていく力を持っています。あなたが待ってあげているその時間が、お子さんの根っこになっています🌊",
   },
   melancholic: {
-    title: "繊細こだわりタイプ",
+    title: "おもいやり繊細タイプ",
     tagline: "豊かな感受性を持つ繊細な芸術家",
     strengths: ["高い共感力と思いやり", "深く考え物事を丁寧にこなす", "芸術的・審美的センス", "細部への気配り"],
     challenges: ["傷つきやすく落ち込みやすい", "完璧主義で自分を追い詰める", "不安や心配が多くなりやすい"],
@@ -192,49 +192,49 @@ export const miDesc: Record<MIType, {
   activities: string[];
 }> = {
   linguistic: {
-    title: "言語的知能",
+    title: "ことば・お話が得意",
     tagline: "言葉で世界を理解する",
     learningStyle: "読む・聞く・話すことで学ぶ。物語や言葉遊びが学びの扉になります。",
     activities: ["読み聞かせや図書館通い", "日記や絵日記をつける", "なぞなぞ・しりとり・言葉遊び", "自分の話を聞いてもらう時間"],
   },
   logical: {
-    title: "論理・数学的知能",
+    title: "なぜなぜ・考えるのが好き",
     tagline: "仕組みと理由を探求する",
     learningStyle: "数字、パターン、論理的な問いかけから学ぶ。「なぜ？」に答え続けることが力になります。",
     activities: ["簡単な実験や観察", "パズル・数遊び・ボードゲーム", "料理や買い物で数を使う体験", "「なぜ？」への丁寧な説明"],
   },
   spatial: {
-    title: "空間的知能",
+    title: "つくる・えがくのが得意",
     tagline: "視覚でイメージして創造する",
     learningStyle: "見て・描いて・作ることで学ぶ。視覚的な情報が頭の中で豊かに広がります。",
     activities: ["絵を描く・粘土・工作", "ブロック・積み木・レゴ", "地図を一緒に作る・迷路遊び", "映像や写真で学ぶ機会を増やす"],
   },
   musical: {
-    title: "音楽的知能",
+    title: "音楽・リズムが大好き",
     tagline: "リズムとメロディで感じる",
     learningStyle: "音楽、リズム、メロディで学ぶ。歌いながら覚えると記憶が定着しやすい。",
     activities: ["好きな音楽を一緒に聴く・歌う", "楽器に触れる機会を作る", "リズム遊び・手遊び歌", "学習内容を歌やリズムに乗せる"],
   },
   bodily: {
-    title: "身体運動的知能",
+    title: "からだを動かすのが得意",
     tagline: "体で感じて体で覚える",
     learningStyle: "体を動かし、手を使って作ることで学ぶ。実際にやってみることが一番の学び。",
     activities: ["スポーツや体を使った遊びをたくさん", "工作・料理・ガーデニングなど手仕事", "外遊びと体験型の学び", "じっとしているより動きながらの学習"],
   },
   interpersonal: {
-    title: "対人的知能",
+    title: "お友達と遊ぶのが得意",
     tagline: "人とのつながりで輝く",
     learningStyle: "人との関わりの中で学ぶ。友達や家族と一緒に学ぶと力が伸びます。",
     activities: ["友達と一緒に遊ぶ機会を大切に", "グループでの学びやゲーム", "家族での会話・話し合いの時間", "人の気持ちを考えるロールプレイ"],
   },
   intrapersonal: {
-    title: "内省的知能",
+    title: "じっくり考えるのが得意",
     tagline: "自分の内側と深く向き合う",
     learningStyle: "一人でじっくり考え、自分の感情や体験を振り返ることで学ぶ。",
     activities: ["一人で集中できる静かな時間・空間", "日記や絵日記で気持ちを表現", "好きなことを自分のペースで深める", "感情を受け止めてもらう安心できる会話"],
   },
   naturalist: {
-    title: "博物的知能",
+    title: "自然・いきものが大好き",
     tagline: "自然の中で発見し分類する",
     learningStyle: "自然観察と分類・収集を通じて学ぶ。外に出て触れること全てが教材になります。",
     activities: ["公園・森・海での自然体験", "虫・植物・石などのコレクション", "図鑑や自然の本", "動物園・水族館・植物園"],

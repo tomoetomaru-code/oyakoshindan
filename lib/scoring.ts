@@ -129,6 +129,7 @@ export const steinerDesc: Record<SteinerType, {
   tagline: string;
   strengths: string[];
   challenges: string[];
+  supportText: string;
   parentTips: string[];
   supportYell: string;
 }> = {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { childQuestions, parentQuestions } from "@/lib/questions";
 import {
   buildResult,
@@ -60,6 +60,14 @@ function ResultContent() {
           </h1>
           <p className="text-sm mt-2" style={{ color: "var(--text-muted)" }}>
             お子さんと親御さんの個性プロフィールをお届けします
+          </p>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="rounded-xl px-5 py-4 slide-up"
+          style={{ background: "#F0F7F4", border: "1px solid #4A9B8E40" }}>
+          <p className="text-xs leading-relaxed" style={{ color: "#2D6B5E" }}>
+            💡 この診断は、お子さんや親御さんの<strong>傾向を知るためのヒント</strong>です。スコアや結果よりも、読んでみて「そうかも！」と感じた部分を大切にしてください。同じお子さんでも日によって答えが変わることもあります。あくまで子育てのヒントとして、気軽にお使いください🌿
           </p>
         </div>
 
@@ -313,9 +321,16 @@ function ResultContent() {
 
         {/* Actions */}
         <div className="flex flex-col gap-3 pb-10">
-          <button className="btn-primary w-full justify-center" onClick={() => window.print()}>
-            🖨 結果を印刷・保存する
+          <button className="btn-primary w-full justify-center" onClick={() => {
+            window.print();
+          }}>
+            📄 PDFで保存する
           </button>
+          <div className="rounded-xl px-4 py-3 text-xs leading-relaxed"
+            style={{ background: "#FEF3DA", border: "1px solid #F5A62340", color: "#8B5E0A" }}>
+            💡 <strong>保存方法：</strong>上のボタンを押すと印刷画面が開きます。<br />
+            送信先（プリンター選択欄）で「<strong>PDFに保存</strong>」を選ぶと、PDFファイルとして保存できます📁
+          </div>
           <Link href="/" className="w-full">
             <button className="w-full py-3 rounded-xl text-sm font-medium"
               style={{ border: "1.5px solid var(--border)", background: "white", color: "var(--sage)" }}>

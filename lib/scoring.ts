@@ -72,7 +72,7 @@ export const steinerLabel: Record<SteinerType, string> = {
   sanguine: "わくわく冒険タイプ",
   choleric: "熱血チャレンジャータイプ",
   phlegmatic: "ほっこりマイペースタイプ",
-  melancholic: "おもいやり繊細タイプ",
+  melancholic: "おもいやり深い共感タイプ",
 };
 
 export const steinerColor: Record<SteinerType, string> = {
@@ -169,7 +169,7 @@ export const steinerDesc: Record<SteinerType, {
     supportYell: "「もっと早くして」「なんでできないの」と思う瞬間があっても、責めなくて大丈夫。このタイプのお子さんはゆっくり確実に、自分のペースで育っていく力を持っています。あなたが待ってあげているその時間が、お子さんの根っこになっています🌊",
   },
   melancholic: {
-    title: "おもいやり繊細タイプ",
+    title: "おもいやり深い共感タイプ",
     tagline: "豊かな感受性を持つ繊細な芸術家",
     strengths: ["高い共感力と思いやり", "深く考え物事を丁寧にこなす", "芸術的・審美的センス", "細部への気配り"],
     challenges: ["傷つきやすく落ち込みやすい", "完璧主義で自分を追い詰める", "不安や心配が多くなりやすい"],

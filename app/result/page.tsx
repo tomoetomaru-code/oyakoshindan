@@ -11,6 +11,7 @@ import {
   miLabel,
   miEmoji,
   orientationLabel,
+  orientationDesc,
   steinerDesc,
   miDesc,
   combinationAdvice,
@@ -92,7 +93,7 @@ function ResultContent() {
               </span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-1 gap-3 mb-4">
             <div className="rounded-xl p-3" style={{ background: "#E6F4F2", border: "1px solid #4A9B8E30" }}>
               <p className="text-xs font-medium mb-2" style={{ color: "#1A5C56" }}>✨ 強み</p>
               <ul className="space-y-1">
@@ -101,24 +102,25 @@ function ResultContent() {
                 ))}
               </ul>
             </div>
-            <div className="rounded-xl p-3" style={{ background: "#FEF3DA", border: "1px solid #F5A62330" }}>
-              <p className="text-xs font-medium mb-2" style={{ color: "#8B5E0A" }}>🌱 サポートポイント</p>
-              <ul className="space-y-1">
-                {childTempInfo.challenges.slice(0, 3).map((c, i) => (
-                  <li key={i} className="text-xs" style={{ color: "#8B5E0A" }}>・{c}</li>
-                ))}
-              </ul>
+            <div className="rounded-xl p-4" style={{ background: "#FEF3DA", border: "1px solid #F5A62330" }}>
+              <p className="text-xs font-medium mb-2" style={{ color: "#8B5E0A" }}>🌱 サポートのヒント</p>
+              <p className="text-sm leading-relaxed" style={{ color: "#8B5E0A" }}>{childTempInfo.supportText}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 rounded-xl px-4 py-3"
+          <div className="rounded-xl px-4 py-4"
             style={{ background: "var(--cream)", border: "1px solid var(--border)" }}>
-            <span className="text-lg">🧭</span>
-            <div>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>エネルギーの方向</p>
-              <p className="font-medium text-sm" style={{ color: "var(--forest)" }}>
-                {orientationLabel[child.orientation]}
-              </p>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-lg">🧭</span>
+              <div>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>エネルギーの方向</p>
+                <p className="font-medium text-sm" style={{ color: "var(--forest)" }}>
+                  {orientationLabel[child.orientation]}
+                </p>
+              </div>
             </div>
+            <p className="text-xs leading-relaxed mt-1" style={{ color: "var(--text-muted)" }}>
+              {orientationDesc[child.orientation]}
+            </p>
           </div>
         </section>
 
@@ -140,8 +142,11 @@ function ResultContent() {
             ))}
           </div>
           <div className="space-y-4">
-            {child.topIntelligences.slice(0, 2).map((mi, i) => {
+            {child.topIntelligences.slice(0, 3).map((mi, i) => {
               const info = miDesc[mi];
+              const rankLabel = i === 0 ? "第1位" : i === 1 ? "第2位" : "第3位";
+              const rankBg = i === 0 ? "var(--forest)" : i === 1 ? "var(--blush)" : "#F0F0F0";
+              const rankColor = i === 0 ? "white" : i === 1 ? "var(--sage)" : "#888";
               return (
                 <div key={mi} className="rounded-xl p-4"
                   style={{ background: "var(--cream)", border: "1px solid var(--border)" }}>
@@ -149,8 +154,8 @@ function ResultContent() {
                     <span className="text-xl">{miEmoji[mi]}</span>
                     <div>
                       <span className="text-xs px-2 py-0.5 rounded-full mr-2"
-                        style={{ background: i === 0 ? "var(--forest)" : "var(--blush)", color: i === 0 ? "white" : "var(--sage)" }}>
-                        {i === 0 ? "第1位" : "第2位"}
+                        style={{ background: rankBg, color: rankColor }}>
+                        {rankLabel}
                       </span>
                       <span className="font-semibold text-sm" style={{ color: "var(--forest)" }}>{info.title}</span>
                     </div>
@@ -198,13 +203,18 @@ function ResultContent() {
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-3 rounded-xl px-4 py-3 mb-4"
+          <div className="rounded-xl px-4 py-4 mb-4"
             style={{ background: "var(--cream)", border: "1px solid var(--border)" }}>
-            <span className="text-lg">🧭</span>
-            <div>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>エネルギーの方向</p>
-              <p className="font-medium text-sm" style={{ color: "var(--forest)" }}>{orientationLabel[parent.orientation]}</p>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-lg">🧭</span>
+              <div>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>エネルギーの方向</p>
+                <p className="font-medium text-sm" style={{ color: "var(--forest)" }}>{orientationLabel[parent.orientation]}</p>
+              </div>
             </div>
+            <p className="text-xs leading-relaxed mt-1" style={{ color: "var(--text-muted)" }}>
+              {orientationDesc[parent.orientation]}
+            </p>
           </div>
           <div className="space-y-3">
             <div className="rounded-xl p-4" style={{ background: "#FDECEA", border: "1px solid #E05A4E30" }}>
@@ -268,7 +278,6 @@ function ResultContent() {
             </div>
             <div className="rounded-xl p-4"
               style={{ background: "var(--cream)", border: "1px solid var(--border)" }}>
-              <p className="font-mincho font-semibold mb-2" style={{ color: "var(--forest)" }}>{combo.title}</p>
               <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{combo.description}</p>
             </div>
           </section>

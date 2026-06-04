@@ -29,17 +29,32 @@ function ResultContent() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadPDF = async () => {
-    const html2pdf = (await import("html2pdf.js")).default;
     const element = contentRef.current;
     if (!element) return;
-    const opt = {
-      margin: 10,
-      filename: "親子の個性診断結果.pdf",
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-    };
-    html2pdf().set(opt).from(element).save();
+
+    const { default: html2canvas } = await import("html2canvas");
+    const { default: jsPDF } = await import("jspdf");
+
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+    let position = 0;
+    let remaining = imgHeight;
+
+    while (remaining > 0) {
+      pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
+      remaining -= pageHeight;
+      if (remaining > 0) {
+        pdf.addPage();
+        position -= pageHeight;
+      }
+    }
+
+    pdf.save("親子の個性診断結果.pdf");
   };
 
   if (!cParam || !pParam) {
@@ -325,7 +340,6 @@ function ResultContent() {
               </li>
             ))}
           </ul>
-          {/* Support yell */}
           <div className="rounded-xl p-5"
             style={{ background: "linear-gradient(135deg, #FEF3DA, #E6F4F2)", border: "1.5px solid var(--border)" }}>
             <p className="text-sm font-medium mb-3" style={{ color: "var(--forest)" }}>🌸 あなたへのエール</p>

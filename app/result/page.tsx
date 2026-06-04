@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useRef } from "react";
 import { childQuestions, parentQuestions } from "@/lib/questions";
 import {
   buildResult,
@@ -26,6 +26,22 @@ function ResultContent() {
   const cParam = params.get("c");
   const pParam = params.get("p");
 
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadPDF = async () => {
+    const html2pdf = (await import("html2pdf.js")).default;
+    const element = contentRef.current;
+    if (!element) return;
+    const opt = {
+      margin: 10,
+      filename: "親子の個性診断結果.pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    };
+    html2pdf().set(opt).from(element).save();
+  };
+
   if (!cParam || !pParam) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4">
@@ -49,7 +65,7 @@ function ResultContent() {
   const parentTempInfo = steinerDesc[parent.primaryTemperament];
 
   return (
-    <main className="min-h-screen px-4 py-10">
+    <main className="min-h-screen px-4 py-10" ref={contentRef}>
       <div className="max-w-2xl mx-auto space-y-6">
 
         {/* Header */}
@@ -321,15 +337,12 @@ function ResultContent() {
 
         {/* Actions */}
         <div className="flex flex-col gap-3 pb-10">
-          <button className="btn-primary w-full justify-center" onClick={() => {
-            window.print();
-          }}>
+          <button className="btn-primary w-full justify-center" onClick={handleDownloadPDF}>
             📄 PDFで保存する
           </button>
           <div className="rounded-xl px-4 py-3 text-xs leading-relaxed"
             style={{ background: "#FEF3DA", border: "1px solid #F5A62340", color: "#8B5E0A" }}>
-            💡 <strong>保存方法：</strong>上のボタンを押すと印刷画面が開きます。<br />
-            送信先（プリンター選択欄）で「<strong>PDFに保存</strong>」を選ぶと、PDFファイルとして保存できます📁
+            💡 <strong>保存方法：</strong>上のボタンを押すと、PDFファイルが自動でダウンロードされます📁
           </div>
           <Link href="/" className="w-full">
             <button className="w-full py-3 rounded-xl text-sm font-medium"

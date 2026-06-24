@@ -35,35 +35,8 @@ const handleDownloadPDF = async () => {
   const { default: html2canvas } = await import("html2canvas");
   const { default: jsPDF } = await import("jspdf");
 
-  // CSS変数を実際の色に解決する
-  const style = getComputedStyle(document.documentElement);
-  const cssVarMap: Record<string, string> = {
-    "--forest": style.getPropertyValue("--forest").trim(),
-    "--sage": style.getPropertyValue("--sage").trim(),
-    "--blush": style.getPropertyValue("--blush").trim(),
-    "--cream": style.getPropertyValue("--cream").trim(),
-    "--border": style.getPropertyValue("--border").trim(),
-    "--text-muted": style.getPropertyValue("--text-muted").trim(),
-  };
-
-  // すべての要素のCSS変数をインラインスタイルに展開
-  const allElements = element.querySelectorAll<HTMLElement>("*");
-  const originalStyles: { el: HTMLElement; style: string }[] = [];
-
-  allElements.forEach((el) => {
-    originalStyles.push({ el, style: el.getAttribute("style") || "" });
-    const computed = getComputedStyle(el);
-    let inlineStyle = el.getAttribute("style") || "";
-
-    ["color", "background-color", "border-color", "background"].forEach((prop) => {
-      const val = computed.getPropertyValue(prop);
-      if (val && val !== "rgba(0, 0, 0, 0)" && val !== "transparent") {
-        inlineStyle += `;${prop}:${val}`;
-      }
-    });
-
-    el.setAttribute("style", inlineStyle);
-  });
+  // Webフォントが完全に読み込まれるのを待つ
+  await document.fonts.ready;
 
   const canvas = await html2canvas(element, {
     scale: 2,
@@ -72,15 +45,12 @@ const handleDownloadPDF = async () => {
     logging: false,
   });
 
-  // 元のスタイルに戻す
-  originalStyles.forEach(({ el, style }) => {
-    el.setAttribute("style", style);
-  });
-
   const imgData = canvas.toDataURL("image/png");
   const pdf = new jsPDF("p", "mm", "a4");
+  
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
+  
   const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
   let position = 0;

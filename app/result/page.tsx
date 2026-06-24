@@ -35,7 +35,15 @@ function ResultContent() {
     const { default: html2canvas } = await import("html2canvas");
     const { default: jsPDF } = await import("jspdf");
 
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+    const canvas = await html2canvas(element, {
+  scale: 2,
+  useCORS: true,
+  backgroundColor: "#ffffff",
+  logging: false,
+  allowTaint: true,
+  foreignObjectRendering: false,
+});
+
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();

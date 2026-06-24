@@ -28,12 +28,75 @@ function ResultContent() {
 
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const handleDownloadPDF = async () => {
-    const element = contentRef.current;
-    if (!element) return;
+const handleDownloadPDF = async () => {
+  const element = contentRef.current;
+  if (!element) return;
 
-    const { default: html2canvas } = await import("html2canvas");
-    const { default: jsPDF } = await import("jspdf");
+  const { default: html2canvas } = await import("html2canvas");
+  const { default: jsPDF } = await import("jspdf");
+
+  // CSS変数を実際の色に解決する
+  const style = getComputedStyle(document.documentElement);
+  const cssVarMap: Record<string, string> = {
+    "--forest": style.getPropertyValue("--forest").trim(),
+    "--sage": style.getPropertyValue("--sage").trim(),
+    "--blush": style.getPropertyValue("--blush").trim(),
+    "--cream": style.getPropertyValue("--cream").trim(),
+    "--border": style.getPropertyValue("--border").trim(),
+    "--text-muted": style.getPropertyValue("--text-muted").trim(),
+  };
+
+  // すべての要素のCSS変数をインラインスタイルに展開
+  const allElements = element.querySelectorAll<HTMLElement>("*");
+  const originalStyles: { el: HTMLElement; style: string }[] = [];
+
+  allElements.forEach((el) => {
+    originalStyles.push({ el, style: el.getAttribute("style") || "" });
+    const computed = getComputedStyle(el);
+    let inlineStyle = el.getAttribute("style") || "";
+
+    ["color", "background-color", "border-color", "background"].forEach((prop) => {
+      const val = computed.getPropertyValue(prop);
+      if (val && val !== "rgba(0, 0, 0, 0)" && val !== "transparent") {
+        inlineStyle += `;${prop}:${val}`;
+      }
+    });
+
+    el.setAttribute("style", inlineStyle);
+  });
+
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#ffffff",
+    logging: false,
+  });
+
+  // 元のスタイルに戻す
+  originalStyles.forEach(({ el, style }) => {
+    el.setAttribute("style", style);
+  });
+
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF("p", "mm", "a4");
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+  let position = 0;
+  let remaining = imgHeight;
+
+  while (remaining > 0) {
+    pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
+    remaining -= pageHeight;
+    if (remaining > 0) {
+      pdf.addPage();
+      position -= pageHeight;
+    }
+  }
+
+  pdf.save("親子の個性診断結果.pdf");
+};
 
     const canvas = await html2canvas(element, {
   scale: 2,

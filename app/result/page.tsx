@@ -18,7 +18,6 @@ import {
   getCombinationKey,
   parentSelfCare,
 } from "@/lib/scoring";
-import { SteinerType, MIType } from "@/lib/types";
 import Link from "next/link";
 
 function ResultContent() {
@@ -28,58 +27,30 @@ function ResultContent() {
 
   const contentRef = useRef<HTMLDivElement>(null);
 
-const handleDownloadPDF = async () => {
-  const element = contentRef.current;
-  if (!element) return;
+  // ▼ PDFダウンロード機能（重複を直して一つにまとめました）
+  const handleDownloadPDF = async () => {
+    const element = contentRef.current;
+    if (!element) return;
 
-  const { default: html2canvas } = await import("html2canvas");
-  const { default: jsPDF } = await import("jspdf");
+    const { default: html2canvas } = await import("html2canvas");
+    const { default: jsPDF } = await import("jspdf");
 
-  // Webフォントが完全に読み込まれるのを待つ
-  await document.fonts.ready;
+    // Webフォントが完全に読み込まれるのを待つ
+    await document.fonts.ready;
 
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: "#ffffff",
-    logging: false,
-  });
-
-  const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF("p", "mm", "a4");
-  
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  
-  const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
-  let position = 0;
-  let remaining = imgHeight;
-
-  while (remaining > 0) {
-    pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
-    remaining -= pageHeight;
-    if (remaining > 0) {
-      pdf.addPage();
-      position -= pageHeight;
-    }
-  }
-
-  pdf.save("親子の個性診断結果.pdf");
-};
     const canvas = await html2canvas(element, {
-  scale: 2,
-  useCORS: true,
-  backgroundColor: "#ffffff",
-  logging: false,
-  allowTaint: true,
-  foreignObjectRendering: false,
-});
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+    });
 
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
+    
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
+    
     const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
     let position = 0;

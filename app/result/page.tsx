@@ -97,7 +97,6 @@ const handleDownloadPDF = async () => {
 
   pdf.save("親子の個性診断結果.pdf");
 };
-
     const canvas = await html2canvas(element, {
   scale: 2,
   useCORS: true,

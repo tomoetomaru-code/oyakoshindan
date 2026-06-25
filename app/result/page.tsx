@@ -36,25 +36,32 @@ const handleDownloadPDF = async () => {
 
   await document.fonts.ready;
 
+  // 一時的にbodyのスクロールを無効化し、全体を展開
+  const originalBodyOverflow = document.body.style.overflow;
+  const originalBodyHeight = document.body.style.height;
+  document.body.style.overflow = "visible";
+  document.body.style.height = "auto";
+
   const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
     backgroundColor: "#ffffff",
     logging: false,
+    scrollX: 0,
+    scrollY: -window.scrollY,
+    windowWidth: document.documentElement.scrollWidth,
+    windowHeight: document.documentElement.scrollHeight,
     onclone: (_doc, clonedEl) => {
-      // クローン内の全要素に対して処理
       const all = clonedEl.querySelectorAll<HTMLElement>("*");
       all.forEach((el) => {
         const computed = window.getComputedStyle(el);
 
-        // rgba形式の色を取得して不透明に変換
         const toSolid = (rgba: string): string => {
           const m = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
           if (!m) return rgba;
           const r = +m[1], g = +m[2], b = +m[3];
           const a = m[4] !== undefined ? +m[4] : 1;
-          if (a === 1) return `rgb(${r},${g},${b})`;
-          // 白背景と合成して不透明化
+          if (a >= 0.99) return `rgb(${r},${g},${b})`;
           const rr = Math.round(r * a + 255 * (1 - a));
           const gg = Math.round(g * a + 255 * (1 - a));
           const bb = Math.round(b * a + 255 * (1 - a));
@@ -76,6 +83,10 @@ const handleDownloadPDF = async () => {
     },
   });
 
+  // 元に戻す
+  document.body.style.overflow = originalBodyOverflow;
+  document.body.style.height = originalBodyHeight;
+
   const imgData = canvas.toDataURL("image/png");
   const pdf = new jsPDF("p", "mm", "a4");
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -96,6 +107,7 @@ const handleDownloadPDF = async () => {
 
   pdf.save("親子の個性診断結果.pdf");
 };
+  
   if (!cParam || !pParam) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4">

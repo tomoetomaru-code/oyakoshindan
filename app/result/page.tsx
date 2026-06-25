@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useRef } from "react";
+import { Suspense } from "react";
 import { childQuestions, parentQuestions } from "@/lib/questions";
 import {
   buildResult,
@@ -25,89 +25,6 @@ function ResultContent() {
   const cParam = params.get("c");
   const pParam = params.get("p");
 
-  const contentRef = useRef<HTMLDivElement>(null);
-
-const handleDownloadPDF = async () => {
-  const element = contentRef.current;
-  if (!element) return;
-
-  const { default: html2canvas } = await import("html2canvas");
-  const { default: jsPDF } = await import("jspdf");
-
-  await document.fonts.ready;
-
-  // 一時的にbodyのスクロールを無効化し、全体を展開
-  const originalBodyOverflow = document.body.style.overflow;
-  const originalBodyHeight = document.body.style.height;
-  document.body.style.overflow = "visible";
-  document.body.style.height = "auto";
-
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: "#ffffff",
-    logging: false,
-    scrollX: 0,
-    scrollY: -window.scrollY,
-    windowWidth: document.documentElement.scrollWidth,
-    windowHeight: document.documentElement.scrollHeight,
-    onclone: (_doc, clonedEl) => {
-      const all = clonedEl.querySelectorAll<HTMLElement>("*");
-      all.forEach((el) => {
-        const computed = window.getComputedStyle(el);
-
-        const toSolid = (rgba: string): string => {
-          const m = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-          if (!m) return rgba;
-          const r = +m[1], g = +m[2], b = +m[3];
-          const a = m[4] !== undefined ? +m[4] : 1;
-          if (a >= 0.99) return `rgb(${r},${g},${b})`;
-          const rr = Math.round(r * a + 255 * (1 - a));
-          const gg = Math.round(g * a + 255 * (1 - a));
-          const bb = Math.round(b * a + 255 * (1 - a));
-          return `rgb(${rr},${gg},${bb})`;
-        };
-
-        const bg = computed.backgroundColor;
-        const color = computed.color;
-        const border = computed.borderColor;
-
-        el.style.color = toSolid(color);
-        if (bg && bg !== "rgba(0, 0, 0, 0)") {
-          el.style.backgroundColor = toSolid(bg);
-        }
-        if (border && border !== "rgba(0, 0, 0, 0)") {
-          el.style.borderColor = toSolid(border);
-        }
-      });
-    },
-  });
-
-  // 元に戻す
-  document.body.style.overflow = originalBodyOverflow;
-  document.body.style.height = originalBodyHeight;
-
-  const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF("p", "mm", "a4");
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
-  let position = 0;
-  let remaining = imgHeight;
-
-  while (remaining > 0) {
-    pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
-    remaining -= pageHeight;
-    if (remaining > 0) {
-      pdf.addPage();
-      position -= pageHeight;
-    }
-  }
-
-  pdf.save("親子の個性診断結果.pdf");
-};
-  
   if (!cParam || !pParam) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4">
@@ -131,7 +48,7 @@ const handleDownloadPDF = async () => {
   const parentTempInfo = steinerDesc[parent.primaryTemperament];
 
   return (
-    <main className="min-h-screen px-4 py-10 bg-white" ref={contentRef}>
+    <main className="min-h-screen px-4 py-10">
       <div className="max-w-2xl mx-auto space-y-6">
 
         {/* Header */}
@@ -401,13 +318,14 @@ const handleDownloadPDF = async () => {
         </section>
 
         {/* Actions */}
-        <div className="flex flex-col gap-3 pb-10">
-          <button className="btn-primary w-full justify-center" onClick={handleDownloadPDF}>
+        <div className="flex flex-col gap-3 pb-10 no-print">
+          <button className="btn-primary w-full justify-center" onClick={() => window.print()}>
             📄 PDFで保存する
           </button>
           <div className="rounded-xl px-4 py-3 text-xs leading-relaxed"
             style={{ background: "#FEF3DA", border: "1px solid #F5A62340", color: "#8B5E0A" }}>
-            💡 <strong>保存方法：</strong>上のボタンを押すと、PDFファイルが自動でダウンロードされます📁
+            💡 <strong>保存方法：</strong>上のボタンを押すと印刷画面が開きます。<br />
+            送信先（プリンター選択欄）で「<strong>PDFに保存</strong>」を選ぶと、PDFファイルとして保存できます📁
           </div>
           <Link href="/" className="w-full">
             <button className="w-full py-3 rounded-xl text-sm font-medium"

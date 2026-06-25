@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useRef } from "react";
 import { childQuestions, parentQuestions } from "@/lib/questions";
 import {
   buildResult,
@@ -20,10 +20,83 @@ import {
 } from "@/lib/scoring";
 import Link from "next/link";
 
+// 16進数8桁カラー（#RRGGBBAA）を白背景合成で不透明RGBに変換
+function resolveColor(color: string): string {
+  // #RRGGBBAA 形式
+  const hex8 = color.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if (hex8) {
+    const r = parseInt(hex8[1], 16);
+    const g = parseInt(hex8[2], 16);
+    const b = parseInt(hex8[3], 16);
+    const a = parseInt(hex8[4], 16) / 255;
+    return `rgb(${Math.round(r * a + 255 * (1 - a))},${Math.round(g * a + 255 * (1 - a))},${Math.round(b * a + 255 * (1 - a))})`;
+  }
+  // rgba() 形式
+  const rgba = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
+  if (rgba) {
+    const r = +rgba[1], g = +rgba[2], b = +rgba[3], a = +rgba[4];
+    return `rgb(${Math.round(r * a + 255 * (1 - a))},${Math.round(g * a + 255 * (1 - a))},${Math.round(b * a + 255 * (1 - a))})`;
+  }
+  return color;
+}
+
 function ResultContent() {
   const params = useSearchParams();
   const cParam = params.get("c");
   const pParam = params.get("p");
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadPDF = async () => {
+    const element = contentRef.current;
+    if (!element) return;
+
+    // ボタンエリアを一時的に非表示
+    const actionArea = element.querySelector(".pdf-hide") as HTMLElement | null;
+    if (actionArea) actionArea.style.display = "none";
+
+    // すべての要素の色を不透明に変換
+    const allEls = element.querySelectorAll<HTMLElement>("*");
+    const saved = new Map<HTMLElement, string>();
+    allEls.forEach((el) => {
+      saved.set(el, el.getAttribute("style") || "");
+      const cs = window.getComputedStyle(el);
+      let s = el.getAttribute("style") || "";
+
+      const color = resolveColor(cs.color);
+      const bg = resolveColor(cs.backgroundColor);
+      const border = resolveColor(cs.borderColor);
+
+      s += `;color:${color};`;
+      if (cs.backgroundColor !== "rgba(0, 0, 0, 0)") s += `background-color:${bg};`;
+      if (cs.borderColor !== "rgba(0, 0, 0, 0)") s += `border-color:${border};`;
+      el.setAttribute("style", s);
+    });
+
+    const html2pdf = (await import("html2pdf.js")).default;
+    await html2pdf()
+      .set({
+        margin: 8,
+        filename: "親子の個性診断結果.pdf",
+        image: { type: "jpeg", quality: 1.0 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          logging: false,
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .from(element)
+      .save();
+
+    // 元に戻す
+    allEls.forEach((el) => {
+      const orig = saved.get(el);
+      if (!orig) el.removeAttribute("style");
+      else el.setAttribute("style", orig);
+    });
+    if (actionArea) actionArea.style.display = "";
+  };
 
   if (!cParam || !pParam) {
     return (
@@ -48,7 +121,7 @@ function ResultContent() {
   const parentTempInfo = steinerDesc[parent.primaryTemperament];
 
   return (
-    <main className="min-h-screen px-4 py-10">
+    <main className="min-h-screen px-4 py-10" ref={contentRef}>
       <div className="max-w-2xl mx-auto space-y-6">
 
         {/* Header */}
@@ -318,14 +391,13 @@ function ResultContent() {
         </section>
 
         {/* Actions */}
-        <div className="flex flex-col gap-3 pb-10 no-print">
-          <button className="btn-primary w-full justify-center" onClick={() => window.print()}>
+        <div className="pdf-hide flex flex-col gap-3 pb-10">
+          <button className="btn-primary w-full justify-center" onClick={handleDownloadPDF}>
             📄 PDFで保存する
           </button>
           <div className="rounded-xl px-4 py-3 text-xs leading-relaxed"
             style={{ background: "#FEF3DA", border: "1px solid #F5A62340", color: "#8B5E0A" }}>
-            💡 <strong>保存方法：</strong>上のボタンを押すと印刷画面が開きます。<br />
-            送信先（プリンター選択欄）で「<strong>PDFに保存</strong>」を選ぶと、PDFファイルとして保存できます📁
+            💡 <strong>保存方法：</strong>上のボタンを押すと、PDFファイルが自動でダウンロードされます📁
           </div>
           <Link href="/" className="w-full">
             <button className="w-full py-3 rounded-xl text-sm font-medium"

@@ -27,7 +27,7 @@ function ResultContent() {
 
   const contentRef = useRef<HTMLDivElement>(null);
 
- const handleDownloadPDF = async () => {
+const handleDownloadPDF = async () => {
   const element = contentRef.current;
   if (!element) return;
 
@@ -36,69 +36,44 @@ function ResultContent() {
 
   await document.fonts.ready;
 
-  // 透明度付き16進カラーを不透明RGBに変換するヘルパー
-  const resolveAlphaColor = (color: string): string => {
-    // #RRGGBBAA 形式（8桁）を白背景合成で不透明に変換
-    const match8 = color.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
-    if (match8) {
-      const r = parseInt(match8[1], 16);
-      const g = parseInt(match8[2], 16);
-      const b = parseInt(match8[3], 16);
-      const a = parseInt(match8[4], 16) / 255;
-      // 白背景(255,255,255)と合成
-      const rr = Math.round(r * a + 255 * (1 - a));
-      const gg = Math.round(g * a + 255 * (1 - a));
-      const bb = Math.round(b * a + 255 * (1 - a));
-      return `rgb(${rr},${gg},${bb})`;
-    }
-    return color;
-  };
-
-  const allElements = element.querySelectorAll<HTMLElement>("*");
-  const originalStyles = new Map<HTMLElement, string | null>();
-
-  allElements.forEach((el) => {
-    originalStyles.set(el, el.getAttribute("style"));
-    const computed = window.getComputedStyle(el);
-    let currentStyle = el.getAttribute("style") || "";
-    if (currentStyle && !currentStyle.endsWith(";")) currentStyle += "; ";
-
-    const color = computed.color;
-    const bg = computed.backgroundColor;
-    const borderColor = computed.borderColor;
-
-    if (color && color !== "rgba(0, 0, 0, 0)") {
-      currentStyle += `color: ${resolveAlphaColor(color)} !important; `;
-    }
-    if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
-      currentStyle += `background-color: ${resolveAlphaColor(bg)} !important; `;
-    }
-    if (borderColor && borderColor !== "rgba(0, 0, 0, 0)") {
-      currentStyle += `border-color: ${resolveAlphaColor(borderColor)} !important; `;
-    }
-
-    el.setAttribute("style", currentStyle);
-  });
-
   const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
     backgroundColor: "#ffffff",
     logging: false,
-    onclone: (clonedDoc) => {
-      // クローン内のすべての要素にも同じ処理を適用
-      const clonedEl = clonedDoc.body;
-      clonedEl.style.backgroundColor = "#ffffff";
-    },
-  });
+    onclone: (_doc, clonedEl) => {
+      // クローン内の全要素に対して処理
+      const all = clonedEl.querySelectorAll<HTMLElement>("*");
+      all.forEach((el) => {
+        const computed = window.getComputedStyle(el);
 
-  allElements.forEach((el) => {
-    const orig = originalStyles.get(el);
-    if (orig === null || orig === "") {
-      el.removeAttribute("style");
-    } else if (orig) {
-      el.setAttribute("style", orig);
-    }
+        // rgba形式の色を取得して不透明に変換
+        const toSolid = (rgba: string): string => {
+          const m = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+          if (!m) return rgba;
+          const r = +m[1], g = +m[2], b = +m[3];
+          const a = m[4] !== undefined ? +m[4] : 1;
+          if (a === 1) return `rgb(${r},${g},${b})`;
+          // 白背景と合成して不透明化
+          const rr = Math.round(r * a + 255 * (1 - a));
+          const gg = Math.round(g * a + 255 * (1 - a));
+          const bb = Math.round(b * a + 255 * (1 - a));
+          return `rgb(${rr},${gg},${bb})`;
+        };
+
+        const bg = computed.backgroundColor;
+        const color = computed.color;
+        const border = computed.borderColor;
+
+        el.style.color = toSolid(color);
+        if (bg && bg !== "rgba(0, 0, 0, 0)") {
+          el.style.backgroundColor = toSolid(bg);
+        }
+        if (border && border !== "rgba(0, 0, 0, 0)") {
+          el.style.borderColor = toSolid(border);
+        }
+      });
+    },
   });
 
   const imgData = canvas.toDataURL("image/png");

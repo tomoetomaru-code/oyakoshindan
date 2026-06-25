@@ -18,27 +18,8 @@ import {
   getCombinationKey,
   parentSelfCare,
 } from "@/lib/scoring";
+import { SteinerType, MIType } from "@/lib/types";
 import Link from "next/link";
-
-// 16進数8桁カラー（#RRGGBBAA）を白背景合成で不透明RGBに変換
-function resolveColor(color: string): string {
-  // #RRGGBBAA 形式
-  const hex8 = color.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
-  if (hex8) {
-    const r = parseInt(hex8[1], 16);
-    const g = parseInt(hex8[2], 16);
-    const b = parseInt(hex8[3], 16);
-    const a = parseInt(hex8[4], 16) / 255;
-    return `rgb(${Math.round(r * a + 255 * (1 - a))},${Math.round(g * a + 255 * (1 - a))},${Math.round(b * a + 255 * (1 - a))})`;
-  }
-  // rgba() 形式
-  const rgba = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
-  if (rgba) {
-    const r = +rgba[1], g = +rgba[2], b = +rgba[3], a = +rgba[4];
-    return `rgb(${Math.round(r * a + 255 * (1 - a))},${Math.round(g * a + 255 * (1 - a))},${Math.round(b * a + 255 * (1 - a))})`;
-  }
-  return color;
-}
 
 function ResultContent() {
   const params = useSearchParams();
@@ -50,52 +31,95 @@ function ResultContent() {
     const element = contentRef.current;
     if (!element) return;
 
-    // ボタンエリアを一時的に非表示
-    const actionArea = element.querySelector(".pdf-hide") as HTMLElement | null;
+    const { default: html2canvas } = await import("html2canvas");
+    const { default: jsPDF } = await import("jspdf");
+
+    await document.fonts.ready;
+
+    // DOMを複製
+    const clone = element.cloneNode(true) as HTMLElement;
+
+    // 複製をbodyに追加（画面外に配置）
+    clone.style.position = "fixed";
+    clone.style.top = "-99999px";
+    clone.style.left = "0";
+    clone.style.width = element.offsetWidth + "px";
+    clone.style.backgroundColor = "#ffffff";
+    clone.style.zIndex = "-1";
+    document.body.appendChild(clone);
+
+    // ボタンエリアを非表示
+    const actionArea = clone.querySelector(".pdf-hide") as HTMLElement | null;
     if (actionArea) actionArea.style.display = "none";
 
-    // すべての要素の色を不透明に変換
-    const allEls = element.querySelectorAll<HTMLElement>("*");
-    const saved = new Map<HTMLElement, string>();
-    allEls.forEach((el) => {
-      saved.set(el, el.getAttribute("style") || "");
-      const cs = window.getComputedStyle(el);
-      let s = el.getAttribute("style") || "";
+    // 複製内の全要素の色を不透明に変換
+    const allOrigEls = element.querySelectorAll<HTMLElement>("*");
+    const allCloneEls = clone.querySelectorAll<HTMLElement>("*");
 
-      const color = resolveColor(cs.color);
-      const bg = resolveColor(cs.backgroundColor);
-      const border = resolveColor(cs.borderColor);
+    allOrigEls.forEach((origEl, i) => {
+      const cloneEl = allCloneEls[i];
+      if (!cloneEl) return;
 
-      s += `;color:${color};`;
-      if (cs.backgroundColor !== "rgba(0, 0, 0, 0)") s += `background-color:${bg};`;
-      if (cs.borderColor !== "rgba(0, 0, 0, 0)") s += `border-color:${border};`;
-      el.setAttribute("style", s);
+      const cs = window.getComputedStyle(origEl);
+
+      const toSolid = (rgba: string): string => {
+        const m = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (!m) return rgba;
+        const r = +m[1], g = +m[2], b = +m[3];
+        const a = m[4] !== undefined ? +m[4] : 1;
+        if (a >= 1) return `rgb(${r},${g},${b})`;
+        const rr = Math.round(r * a + 255 * (1 - a));
+        const gg = Math.round(g * a + 255 * (1 - a));
+        const bb = Math.round(b * a + 255 * (1 - a));
+        return `rgb(${rr},${gg},${bb})`;
+      };
+
+      const color = cs.color;
+      const bg = cs.backgroundColor;
+      const border = cs.borderColor;
+
+      cloneEl.style.color = toSolid(color);
+      if (bg && bg !== "rgba(0, 0, 0, 0)") {
+        cloneEl.style.backgroundColor = toSolid(bg);
+      }
+      if (border && border !== "rgba(0, 0, 0, 0)") {
+        cloneEl.style.borderColor = toSolid(border);
+      }
     });
 
-    const html2pdf = (await import("html2pdf.js")).default;
-    await html2pdf()
-      .set({
-        margin: 8,
-        filename: "親子の個性診断結果.pdf",
-        image: { type: "jpeg", quality: 1.0 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: "#ffffff",
-          logging: false,
-        },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      })
-      .from(element)
-      .save();
-
-    // 元に戻す
-    allEls.forEach((el) => {
-      const orig = saved.get(el);
-      if (!orig) el.removeAttribute("style");
-      else el.setAttribute("style", orig);
+    const canvas = await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      width: clone.offsetWidth,
+      height: clone.scrollHeight,
+      windowWidth: clone.offsetWidth,
+      windowHeight: clone.scrollHeight,
     });
-    if (actionArea) actionArea.style.display = "";
+
+    // 複製を削除
+    document.body.removeChild(clone);
+
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+    let position = 0;
+    let remaining = imgHeight;
+
+    while (remaining > 0) {
+      pdf.addImage(imgData, "JPEG", 0, position, pageWidth, imgHeight);
+      remaining -= pageHeight;
+      if (remaining > 0) {
+        pdf.addPage();
+        position -= pageHeight;
+      }
+    }
+
+    pdf.save("親子の個性診断結果.pdf");
   };
 
   if (!cParam || !pParam) {

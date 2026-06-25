@@ -27,87 +27,100 @@ function ResultContent() {
 
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const handleDownloadPDF = async () => {
-    const element = contentRef.current;
-    if (!element) return;
+ const handleDownloadPDF = async () => {
+  const element = contentRef.current;
+  if (!element) return;
 
-    const { default: html2canvas } = await import("html2canvas");
-    const { default: jsPDF } = await import("jspdf");
+  const { default: html2canvas } = await import("html2canvas");
+  const { default: jsPDF } = await import("jspdf");
 
-    // Webフォントが完全に読み込まれるのを待つ
-    await document.fonts.ready;
+  await document.fonts.ready;
 
-    // ▼▼色が薄くなる問題の解決策▼▼
-    // html2canvasが解釈できない透過カラーコードやCSS変数を、
-    // ブラウザが計算済みの「正確な濃い色(RGBA)」に一時的に変換して強制適用します。
-    const allElements = element.querySelectorAll<HTMLElement>("*");
-    const originalStyles = new Map<HTMLElement, string | null>();
-
-    allElements.forEach((el) => {
-      // 元のスタイルを記憶
-      originalStyles.set(el, el.getAttribute("style"));
-      
-      // ブラウザが現在画面に描画している「本当の色」を取得
-      const computed = window.getComputedStyle(el);
-      
-      let currentStyle = el.getAttribute("style") || "";
-      if (currentStyle && !currentStyle.endsWith(";")) {
-        currentStyle += "; ";
-      }
-
-      const color = computed.color;
-      const bg = computed.backgroundColor;
-      const borderColor = computed.borderColor;
-
-      // 取得した「本当の色」を、強制的に( !important )インラインスタイルとして上書き
-      if (color && color !== "rgba(0, 0, 0, 0)") currentStyle += `color: ${color} !important; `;
-      if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") currentStyle += `background-color: ${bg} !important; `;
-      if (borderColor && borderColor !== "rgba(0, 0, 0, 0)") currentStyle += `border-color: ${borderColor} !important; `;
-
-      el.setAttribute("style", currentStyle);
-    });
-    // ▲▲ここまで▲▲
-
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-      logging: false,
-    });
-
-    // ▼一時的に書き換えたスタイルを元の状態に戻す（画面の表示がおかしくならないようにするため）
-    allElements.forEach((el) => {
-      const orig = originalStyles.get(el);
-      if (orig === null || orig === "") {
-        el.removeAttribute("style");
-      } else if (orig) {
-        el.setAttribute("style", orig);
-      }
-    });
-
-    // PDF作成処理
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
-    let position = 0;
-    let remaining = imgHeight;
-
-    while (remaining > 0) {
-      pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
-      remaining -= pageHeight;
-      if (remaining > 0) {
-        pdf.addPage();
-        position -= pageHeight;
-      }
+  // 透明度付き16進カラーを不透明RGBに変換するヘルパー
+  const resolveAlphaColor = (color: string): string => {
+    // #RRGGBBAA 形式（8桁）を白背景合成で不透明に変換
+    const match8 = color.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+    if (match8) {
+      const r = parseInt(match8[1], 16);
+      const g = parseInt(match8[2], 16);
+      const b = parseInt(match8[3], 16);
+      const a = parseInt(match8[4], 16) / 255;
+      // 白背景(255,255,255)と合成
+      const rr = Math.round(r * a + 255 * (1 - a));
+      const gg = Math.round(g * a + 255 * (1 - a));
+      const bb = Math.round(b * a + 255 * (1 - a));
+      return `rgb(${rr},${gg},${bb})`;
     }
-
-    pdf.save("親子の個性診断結果.pdf");
+    return color;
   };
 
+  const allElements = element.querySelectorAll<HTMLElement>("*");
+  const originalStyles = new Map<HTMLElement, string | null>();
+
+  allElements.forEach((el) => {
+    originalStyles.set(el, el.getAttribute("style"));
+    const computed = window.getComputedStyle(el);
+    let currentStyle = el.getAttribute("style") || "";
+    if (currentStyle && !currentStyle.endsWith(";")) currentStyle += "; ";
+
+    const color = computed.color;
+    const bg = computed.backgroundColor;
+    const borderColor = computed.borderColor;
+
+    if (color && color !== "rgba(0, 0, 0, 0)") {
+      currentStyle += `color: ${resolveAlphaColor(color)} !important; `;
+    }
+    if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
+      currentStyle += `background-color: ${resolveAlphaColor(bg)} !important; `;
+    }
+    if (borderColor && borderColor !== "rgba(0, 0, 0, 0)") {
+      currentStyle += `border-color: ${resolveAlphaColor(borderColor)} !important; `;
+    }
+
+    el.setAttribute("style", currentStyle);
+  });
+
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#ffffff",
+    logging: false,
+    onclone: (clonedDoc) => {
+      // クローン内のすべての要素にも同じ処理を適用
+      const clonedEl = clonedDoc.body;
+      clonedEl.style.backgroundColor = "#ffffff";
+    },
+  });
+
+  allElements.forEach((el) => {
+    const orig = originalStyles.get(el);
+    if (orig === null || orig === "") {
+      el.removeAttribute("style");
+    } else if (orig) {
+      el.setAttribute("style", orig);
+    }
+  });
+
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF("p", "mm", "a4");
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+  let position = 0;
+  let remaining = imgHeight;
+
+  while (remaining > 0) {
+    pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
+    remaining -= pageHeight;
+    if (remaining > 0) {
+      pdf.addPage();
+      position -= pageHeight;
+    }
+  }
+
+  pdf.save("親子の個性診断結果.pdf");
+};
   if (!cParam || !pParam) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4">
